@@ -5,17 +5,14 @@
 
       "sources": [
         "native/main.cpp",
-
         "native/http/core/*.cpp",
         "native/http/routes/*.cpp",
         "native/http/parser/*.cpp",
-        "native/http/cpool/*.cpp",
-
-        "native/third_party/simdjson/*.cpp"
+        "native/http/cpool/*.cpp"
       ],
 
       "include_dirs": [
-        "<!(node -p \"require('node-addon-api').include\")",
+        "<!@(node -p \"require('node-addon-api').include\")",
         "native/include",
         "native/http/core",
         "native/http/routes",
@@ -24,26 +21,23 @@
         "native/third_party/simdjson"
       ],
 
+      "dependencies": [
+        "<!(node -p \"require('node-addon-api').gyp\")"
+      ],
+
       "defines": [
         "NAPI_VERSION=3",
         "NAPI_CPP_EXCEPTIONS"
       ],
 
       "cflags_cc": [
-        "-std=c++17",
-        "-O3"
+        "-std=c++14",
+        "-fexceptions"
       ],
 
-      "conditions": [
-        ["OS=='win'", {
-          "msvs_settings": {
-            "VCCLCompilerTool": {
-              "ExceptionHandling": 1,
-              "AdditionalOptions": ["/std:c++17"]
-            }
-          }
-        }]
-      ]
+      "xcode_settings": {
+        "GCC_ENABLE_CPP_EXCEPTIONS": "YES"
+      }
     }
   ]
 }

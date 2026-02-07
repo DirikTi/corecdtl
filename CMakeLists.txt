@@ -15,14 +15,12 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/native/http/cpool
 )
 
-include_directories(${CMAKE_SOURCE_DIR}/native/third_party/simdjson)
 
 file(GLOB MAIN_SOURCE "native/main.cpp")
 file(GLOB HTTP_SOURCES "native/http/core/*.cpp")
 file(GLOB ROUTE_BUILDER_SOURCES "native/http/routes/*.cpp")
 file(GLOB CHUNK_PROGRESSION_POOL_SOURCES "native/http/cpool/*.cpp")
 file(GLOB PARSER_SOURCES "native/http/parser/*.cpp")
-file(GLOB SIMDJSON_SOURCES "native/third_party/simdjson/*.cpp")
 
 add_library(${PROJECT_NAME} SHARED 
     ${MAIN_SOURCE}
@@ -30,7 +28,6 @@ add_library(${PROJECT_NAME} SHARED
     ${CHUNK_PROGRESSION_POOL_SOURCES}
     ${PARSER_SOURCES}
     ${HTTP_SOURCES}
-    ${SIMDJSON_SOURCES}
     ${CMAKE_JS_SRC}
 )
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" SUFFIX ".node")
