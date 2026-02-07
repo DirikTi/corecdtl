@@ -6,6 +6,7 @@
 
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "gypfile": true,
 
   "keywords": [
     "http",
@@ -27,7 +28,9 @@
 
   "files": [
     "dist",
-    "build/Release/*.node",
+    "native",
+    "binding.gyp",
+    "CMakeLists.txt",
     "README.md",
     "LICENSE"
   ],
