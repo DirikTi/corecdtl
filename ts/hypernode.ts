@@ -1,5 +1,5 @@
-import bindings from "bindings";
 import { Http } from "./http";
+import path from "path";
 
 export interface IHttpCore {
     registerRoutes(routes: Http.BuildedRoute[]): any;
@@ -52,4 +52,4 @@ export interface HypernodeAddon {
     ): string;
 }
 
-export const hypernode = bindings("hypernode") as HypernodeAddon;
+export const hypernode = require(path.join(__dirname, "../build/Release/hypernode.node")) as HypernodeAddon;

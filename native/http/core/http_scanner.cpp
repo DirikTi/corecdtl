@@ -93,7 +93,7 @@ enum State {
         ST_HN_L,
         ST_HN_O,
         ST_HN_P,
-        ST_HN_R,
+        // ST_HN_R,
         ST_HN_S,
         ST_HN_T,
         ST_HN_U,
@@ -224,7 +224,7 @@ FlagBits scanHeaders(
     while (true) {
         if (__offset >= total && state != ST_HV_CONCAT)
             break;
-
+        std::cout << state << "\n";
         switch (state) {
 
         // ================= STARTUP =================
@@ -269,11 +269,13 @@ FlagBits scanHeaders(
                     __offset++;
                     state = ST_HN_P;
                     continue;
+                    /*
                 case 'r': case 'R':
                     vStart = __offset;
                     __offset++;
                     state = ST_HN_R;
                     continue;
+                    */
                 case 's': case 'S':
                     vStart = __offset;
                     __offset++;

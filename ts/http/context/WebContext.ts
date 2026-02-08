@@ -67,12 +67,18 @@ class WebContext extends HttpContext {
         this.assetParser.setAssetRoute(this.publicStaticRoute);
 
         this.spaRootPath = ctxOpts?.spaRootPath == undefined ? "dist/index.html" : ctxOpts.spaRootPath
-        const _data = fs.readFileSync(this.spaRootPath);
+        let _data;
+        try {
+            _data = fs.readFileSync(this.spaRootPath);
+        } catch (error) {
+            console.error(error);
+            return;
+        }
 
         const __resp = Buffer.from(
             "HTTP/1.1 200 OK\r\n" +
             "Content-Type: text/html; charset=utf-8\r\n" +
-            "Content-Length: " + _data.length + "\r\n" +
+            "Content-Length: " + _data!.length + "\r\n" +
             "Cache-Control: no-cache\r\n" +
             "\r\n",
             "ascii"
@@ -81,7 +87,7 @@ class WebContext extends HttpContext {
         this.assetCache = new Map();
         this.setAllAssets();
 
-        this.spaRespBuffer = Buffer.concat([__resp, _data]);
+        this.spaRespBuffer = Buffer.concat([__resp, _data!]);
 
         this.initRuntime();
         this.bindServer(opts?.netServerOptions);
@@ -125,7 +131,7 @@ class WebContext extends HttpContext {
             chunk, p, 
             this.state.maxHeaderNameSize, this.state.maxHeaderValueSize, this.state.maxContentSize, this.state.requestQuerySize
         );
-
+        console.log(chunk.toString());
         if (p.retFlag !== Http.RetFlagBits.FLAG_OK) {
             switch (p.retFlag) {
                 // --- CORS 204 ---
@@ -196,7 +202,6 @@ class WebContext extends HttpContext {
                     return;
             }
         }
-
         this.routeDefinationFns[routeId](socket, p, routeId, chunk);
     };
 
@@ -229,7 +234,7 @@ class WebContext extends HttpContext {
     protected spaRouteDefinationFn: RouteDefinationFn = (socket, p, routeId, _) => {
         p.free();
         socket.write(this.spaRespBuffer);
-        socket.end();
+        // socket.end();
     }
 
     protected dynamicRouteDefinationFn: RouteDefinationFn = (socket, p, routeId, chunk) => {

@@ -2,6 +2,7 @@
 #include <route.h>
 #include "http_scanner.h"
 #include <cpool.h>
+#include <iostream>
 
 #include <string>
 #include <napi.h>
