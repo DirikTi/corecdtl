@@ -1,6 +1,6 @@
 {
   "name": "corecdtl",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "High-performance customizable HTTP engine",
   "license": "MIT",
   "main": "dist/index.js",
