@@ -388,7 +388,6 @@ Napi::Value HttpCore::PrintRouteTree(const Napi::CallbackInfo& info) {
         default:
             break;
         }
-        std::cout << methodName << "\n";
         RouteBuilder::printRouteTree(this->m_httpRouteMaps[i].route_node, deepth);
     }
 

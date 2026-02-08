@@ -224,7 +224,6 @@ FlagBits scanHeaders(
     while (true) {
         if (__offset >= total && state != ST_HV_CONCAT)
             break;
-        std::cout << state << "\n";
         switch (state) {
 
         // ================= STARTUP =================

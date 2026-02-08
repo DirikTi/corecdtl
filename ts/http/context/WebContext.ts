@@ -131,7 +131,6 @@ class WebContext extends HttpContext {
             chunk, p, 
             this.state.maxHeaderNameSize, this.state.maxHeaderValueSize, this.state.maxContentSize, this.state.requestQuerySize
         );
-        console.log(chunk.toString());
         if (p.retFlag !== Http.RetFlagBits.FLAG_OK) {
             switch (p.retFlag) {
                 // --- CORS 204 ---
