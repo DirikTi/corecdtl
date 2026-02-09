@@ -1,8 +1,6 @@
-name: prebuild
+name: build-prebuilds
 
 on:
-  push:
-  pull_request:
   release:
     types: [created]
 
@@ -23,9 +21,10 @@ jobs:
 
       - run: npm ci
 
-      - run: npx prebuildify --napi --strip
+      - run: npm run prebuild
+
+      - run: tar -czf prebuild-${{ matrix.os }}.tar.gz prebuilds
 
       - uses: softprops/action-gh-release@v2
-        if: github.event_name == 'release'
         with:
-          files: prebuilds/**
+          files: prebuild-${{ matrix.os }}.tar.gz
