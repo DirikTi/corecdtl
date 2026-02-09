@@ -13,10 +13,12 @@ FlagBits scanHeaders(
 
 #if defined(__ARM_NEON) || defined(__ARM_NEON__)
     #define SIMD_NEON 1
-#elif defined(__SSE2__)
+
+#elif defined(__SSE2__) || defined(__AVX2__) || defined(_M_X64) || defined(_M_AMD64)
     #define SIMD_SSE2 1
+
 #else
-    #error "No SIMD backend"
+    #error "No SIMD backend (SSE2/AVX2/NEON required)"
 #endif
 
 #if SIMD_SSE2
