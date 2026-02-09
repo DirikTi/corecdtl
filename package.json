@@ -1,6 +1,6 @@
 {
   "name": "corecdtl",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "High-performance customizable HTTP engine",
   "license": "MIT",
   "main": "dist/index.js",
@@ -19,12 +19,9 @@
     "build": "node-gyp rebuild && rm -rf dist && tsc",
     "install": "node-gyp-build",
     "prebuild": "prebuildify --napi --strip",
-
     "test": "vitest run",
     "benchmark": "node benchmark/e2e/run.js",
-    
     "prepublishOnly": "npm run build",
-    
     "example": "node example/server.js",
     "example:web": "node example/server.web.js"
   },
