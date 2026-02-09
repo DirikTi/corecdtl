@@ -202,7 +202,7 @@ int RouteBuilder::matchUrl(
                 size_t start = *offset;
 
                 while (*p && *p != '/' && *p != '?' && *p != ' ') p++;
-                __builtin_assume(p >= url && p <= url + urlLen);
+                // __builtin_assume(p >= url && p <= url + urlLen);
 
                 size_t param_len = p - (url + start);
                 std::string param_value(url + start, param_len);
@@ -214,7 +214,7 @@ int RouteBuilder::matchUrl(
                 node = child;
                 matched = true;
 
-                if (__builtin_expect((child->vptr_table_index != -1) && (url[*offset] == ' ' || url[*offset] == '?'), 1)) {
+                if ((child->vptr_table_index != -1) && (url[*offset] == ' ' || url[*offset] == '?')) [[likely]] {
                     if (url[*offset] == '?') {
                         if (!parse_query_params(env, url, offset, query_params, query_limit)) return -2;
                         *offset += 1;

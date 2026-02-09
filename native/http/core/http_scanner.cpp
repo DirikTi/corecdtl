@@ -20,7 +20,7 @@ static inline uint8_t ascii_lower(uint8_t c) {
 
 static inline uint64_t load_u64(const char* p) {
     uint64_t v;
-    __builtin_memcpy(&v, p, sizeof(v));
+    std::memcpy(&v, p, sizeof(v));
     return v;
 }
 

@@ -43,15 +43,15 @@ static inline MethodType scanHttpMethod(const char* curl, uint32_t* offset) {
     const char* p = curl + *offset;
     switch (*p) {
         case 'G':
-            if (__builtin_expect(*(p+1) == 'E' && *(p+2) == 'T' &&
-                                (*(p+3) == ' ' || *(p+3) == '\0'), 1)) {
+            if (*(p+1) == 'E' && *(p+2) == 'T' &&
+                (*(p+3) == ' ' || *(p+3) == '\0')) [[likely]] {
                 *offset += 3;
                 return M_GET;
             }
             break;
         case 'H':
-            if (__builtin_expect(*(p+1) == 'E' && *(p+2) == 'A' && *(p+3) == 'D' &&
-                                (*(p+4) == ' ' || *(p+4) == '\0'), 1)) {
+            if (*(p+1) == 'E' && *(p+2) == 'A' && *(p+3) == 'D' &&
+                                (*(p+4) == ' ' || *(p+4) == '\0')) [[likely]] {
                 *offset += 4;
                 return M_HEAD;
             }
@@ -59,21 +59,21 @@ static inline MethodType scanHttpMethod(const char* curl, uint32_t* offset) {
         case 'P':
             switch (*(p+1)) {
                 case 'O':
-                    if (__builtin_expect(*(p+2) == 'S' && *(p+3) == 'T' &&
-                                        (*(p+4) == ' ' || *(p+4) == '\0'), 1)) {
+                    if (*(p+2) == 'S' && *(p+3) == 'T' &&
+                                        (*(p+4) == ' ' || *(p+4) == '\0')) [[likely]] {
                         *offset += 4;
                         return M_POST;
                     }
                     break;
                 case 'U':
-                    if (__builtin_expect(*(p+2) == 'T' && (*(p+3) == ' ' || *(p+3) == '\0'), 1)) {
+                    if (*(p+2) == 'T' && (*(p+3) == ' ' || *(p+3) == '\0')) [[likely]] {
                         *offset += 3;
                         return M_PUT;
                     }
                     break;
                 case 'A':
-                    if (__builtin_expect(*(p+2) == 'T' && *(p+3) == 'C' && *(p+4) == 'H' &&
-                                        (*(p+5) == ' ' || *(p+5) == '\0'), 1)) {
+                    if (*(p+2) == 'T' && *(p+3) == 'C' && *(p+4) == 'H' &&
+                                        (*(p+5) == ' ' || *(p+5) == '\0')) [[likely]] {
                         *offset += 5;
                         return M_PATCH;
                     }
@@ -81,17 +81,17 @@ static inline MethodType scanHttpMethod(const char* curl, uint32_t* offset) {
             }
             break;
         case 'D':
-            if (__builtin_expect(*(p+1) == 'E' && *(p+2) == 'L' && *(p+3) == 'E' &&
+            if (*(p+1) == 'E' && *(p+2) == 'L' && *(p+3) == 'E' &&
                                 *(p+4) == 'T' && *(p+5) == 'E' &&
-                                (*(p+6) == ' ' || *(p+6) == '\0'), 0)) {
+                                (*(p+6) == ' ' || *(p+6) == '\0')) [[unlikely]] {
                 *offset += 6;
                 return M_DELETE;
             }
             break;
         case 'O':
-            if (__builtin_expect(*(p+1) == 'P' && *(p+2) == 'T' && *(p+3) == 'I' &&
+            if (*(p+1) == 'P' && *(p+2) == 'T' && *(p+3) == 'I' &&
                                 *(p+4) == 'O' && *(p+5) == 'N' && *(p+6) == 'S' &&
-                                (*(p+7) == ' ' || *(p+7) == '\0'), 0)) {
+                                (*(p+7) == ' ' || *(p+7) == '\0')) [[unlikely]] {
                 *offset += 7;
                 return M_OPTIONS;
             }
