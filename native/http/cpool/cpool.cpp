@@ -28,13 +28,11 @@ CPool::~CPool() {
     m_freeStack.clear();
 }
 
-__attribute__((always_inline))
-void CPool::pushFreeIndex(int idx) {
+inline void CPool::pushFreeIndex(int idx) {
     m_freeStack.push_back(idx);
 }
 
-__attribute__((always_inline))
-int CPool::popFreeIndex() {
+inline int CPool::popFreeIndex() {
     if (m_freeStack.empty()) [[unlikely]] return -1;
     int idx = m_freeStack.back();
     m_freeStack.pop_back();

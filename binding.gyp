@@ -21,16 +21,16 @@
         "<!(node -p \"require('node-addon-api').gyp\")"
       ],
       "defines": [
-        "NAPI_VERSION=3",
+        "NAPI_VERSION=8",
         "NAPI_CPP_EXCEPTIONS"
       ],
       "cflags_cc": [
-        "-std=c++14",
+        "-std=gnu++17",
         "-fexceptions"
       ],
       "xcode_settings": {
         "GCC_ENABLE_CPP_EXCEPTIONS": "YES",
-        "CLANG_CXX_LANGUAGE_STANDARD": "c++14"
+        "CLANG_CXX_LANGUAGE_STANDARD": "c++17"
       },
       "msvs_settings": {
         "VCCLCompilerTool": {

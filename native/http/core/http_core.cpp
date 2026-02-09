@@ -8,14 +8,14 @@
 #include <napi.h>
 #include <iostream>
 
-__attribute__((always_inline))
-void HttpCore::setMethodFlag(MethodType method) {
+
+inline void HttpCore::setMethodFlag(MethodType method) {
     if (method >= M_HEAD && method <= M_OPTIONS)
         this->m_methodFlags |= (1 << method);
 }
 
-__attribute__((always_inline))
-bool HttpCore::isMethodAllowed(MethodType method) {
+
+inline bool HttpCore::isMethodAllowed(MethodType method) {
     if (method <= M_HEAD || method > M_OPTIONS) return false;
     return this->m_methodFlags & (1 << method);
 }

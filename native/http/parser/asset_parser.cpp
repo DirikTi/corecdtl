@@ -4,8 +4,7 @@
 
 using namespace Asset;
 
-__attribute__((always_inline))
-CacheKind decideCacheKind(uint64_t size) {
+inline CacheKind decideCacheKind(uint64_t size) {
     if (size <= 64 * 1024)
         return Asset::CacheKind::RAM;
     if (size <= 2 * 1024 * 1024)
