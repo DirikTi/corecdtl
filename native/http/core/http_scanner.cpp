@@ -5,9 +5,9 @@
 #include <cstring>
 #include <cctype>
 #include <cstdint>
+#include <cstddef>
 #include <vector>
 #include <algorithm>
-
 
 #include "http_core.h"
 #include "http_scanner.h"
@@ -215,7 +215,7 @@ FlagBits scanHeaders(
     if (*offset + 1 > total) return FLAG_UNTERMINATED_HEADERS;
 
     uint32_t __offset = *offset;
-    ssize_t vStart = 0;
+    std::ptrdiff_t vStart = 0;
     HeaderId hdrId = HDR_UNKNOWN;
     bool hdrMergeable = false;
     std::string headerUnknownName;
