@@ -52,4 +52,4 @@ export interface HypernodeAddon {
     ): string;
 }
 
-export const hypernode = require(path.join(__dirname, "../build/Release/hypernode.node")) as HypernodeAddon;
+export const hypernode = require('node-gyp-build')(path.join(__dirname, '..')) as HypernodeAddon;

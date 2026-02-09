@@ -17,23 +17,26 @@
   ],
   "scripts": {
     "build": "node-gyp rebuild && rm -rf dist && tsc",
-    "rebuild": "node-gyp rebuild --clean && rm -rf dist && tsc",
+    "install": "node-gyp-build",
+    "prebuild": "prebuildify --napi --strip",
+
     "test": "vitest run",
     "benchmark": "node benchmark/e2e/run.js",
+    
     "prepublishOnly": "npm run build",
+    
     "example": "node example/server.js",
     "example:web": "node example/server.web.js"
   },
   "files": [
     "dist",
-    "native",
-    "binding.gyp",
-    "CMakeLists.txt",
+    "prebuilds",
     "README.md",
     "LICENSE"
   ],
   "dependencies": {
-    "node-addon-api": "^8.5.0"
+    "node-addon-api": "^8.5.0",
+    "node-gyp-build": "^4.8.4"
   },
   "devDependencies": {
     "@fastify/express": "^4.0.4",
@@ -43,6 +46,8 @@
     "cmake-js": "^7.3.1",
     "express": "^5.2.1",
     "fastify": "^5.6.2",
+    "prebuildify": "^6.0.1",
+    "rimraf": "^6.1.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
     "vitest": "^3.2.4"
