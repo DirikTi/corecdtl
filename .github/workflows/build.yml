@@ -1,6 +1,10 @@
-name: build
+name: prebuild
 
-on: [push]
+on:
+  push:
+  pull_request:
+  release:
+    types: [created]
 
 jobs:
   build:
@@ -12,8 +16,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
       - run: npm ci
-      - run: npm run prebuild
-      - run: npm pack
+
+      - run: npx prebuildify --napi --strip
+
+      - uses: softprops/action-gh-release@v2
+        if: github.event_name == 'release'
+        with:
+          files: prebuilds/**
