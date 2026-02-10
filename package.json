@@ -13,7 +13,9 @@
     "engine",
     "native",
     "addon",
-    "low-level"
+    "low-level",
+    "fast",
+    "corecdtl"
   ],
   "scripts": {
     "build": "node-gyp rebuild && rm -rf dist && tsc",
@@ -56,5 +58,5 @@
   "bugs": {
     "url": "https://github.com/DirikTi/corecdtl/issues"
   },
-  "homepage": "https://github.com/DirikTi/corecdtl#readme"
+  "homepage": "https://github.com/DirikTi/corecdtl#quickstart"
 }
