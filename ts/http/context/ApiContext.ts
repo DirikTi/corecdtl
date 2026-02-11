@@ -91,7 +91,7 @@ class ApiContext extends HttpContext {
 
                 // --- NOT FOUND ---
                 case Http.RetFlagBits.FLAG_NOT_FOUND:
-                    if (this.enableCors) {
+                    if (this.isEnableCors) {
                         socket.write(
                             this.errorRespMap.RESP_204
                         );

@@ -71,7 +71,7 @@ class WebContext extends HttpContext {
         try {
             _data = fs.readFileSync(this.spaRootPath);
         } catch (error) {
-            console.error(error);
+            console.error("SPA file not found:", this.spaRootPath, error);
             return;
         }
 
@@ -165,7 +165,7 @@ class WebContext extends HttpContext {
 
                 // --- NOT FOUND ---
                 case Http.RetFlagBits.FLAG_NOT_FOUND:
-                    if (this.enableCors) {
+                    if (this.isEnableCors) {
                         socket.write(
                             this.errorRespMap.RESP_204
                         );
@@ -336,23 +336,28 @@ class WebContext extends HttpContext {
 
     protected setAllAssets() {
         const walk = (dir: string, baseUrl: string) => {
-            const entries = fs.readdirSync(dir, { withFileTypes: true })
-
-            for (const entry of entries) {
-                const fullPath = path.join(dir, entry.name)
-                const urlPath = path.posix.join(baseUrl, entry.name)
-
-                if (entry.isDirectory()) {
-                    walk(fullPath, urlPath)
-                    continue
+            try {
+                const entries = fs.readdirSync(dir, { withFileTypes: true })
+    
+                for (const entry of entries) {
+                    const fullPath = path.join(dir, entry.name)
+                    const urlPath = path.posix.join(baseUrl, entry.name)
+    
+                    if (entry.isDirectory()) {
+                        walk(fullPath, urlPath)
+                        continue
+                    }
+    
+                    if (!entry.isFile()) continue
+    
+                    const asset = this.loadAsset(urlPath)
+                    if (!asset) continue
+    
+                    this.assetCache.set(urlPath, asset)
                 }
-
-                if (!entry.isFile()) continue
-
-                const asset = this.loadAsset(urlPath)
-                if (!asset) continue
-
-                this.assetCache.set(urlPath, asset)
+            } catch (error) {
+                console.log("Asset load failed", dir, error);
+                return;
             }
         }
 
@@ -360,8 +365,9 @@ class WebContext extends HttpContext {
     }
 
     private loadAsset(assetPath: string) {
+        let fullPath = "";
         try {
-            const fullPath = path.join(this.publicRoutePathName, assetPath)
+            fullPath = path.join(this.publicRoutePathName, assetPath)
             const body = fs.readFileSync(fullPath)
             const size = body.length
 
@@ -385,7 +391,8 @@ class WebContext extends HttpContext {
 
             return { headers, body, size, payload }
 
-        } catch {
+        } catch(err) {
+            console.error("Asset load failed:", fullPath, err);
             return undefined
         }
     }

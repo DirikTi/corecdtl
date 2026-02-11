@@ -39,7 +39,7 @@ export namespace Http {
     ) => void | Promise<void>;
 
     export type HandlerPipeFn = (
-        socket: net.Socket, 
+        socket: net.Socket,
         chunk: Buffer,
         p: Http.ChunkProgression
     ) => void;
@@ -104,205 +104,132 @@ export namespace Http {
     }
 
     export enum RetFlagBits {
-        FLAG_OK                        = 0x0000,
-        FLAG_BAD_REQUEST               = 0x0001,
-        FLAG_METHOD_NOT_ALLOWED        = 0x0002,
-        FLAG_NOT_FOUND                 = 0x0004,
-        FLAG_CORS_PREFLIGHT            = 0x0008,
-        FLAG_HTTP_VERSION_UNSUPPORTED  = 0x0010,
-        FLAG_CONTENT_LENGTH_TOO_LARGE  = 0x0020,
-        FLAG_MISSING_HOST              = 0x0040,
-        FLAG_HAS_BODY                  = 0x0080,
-        FLAG_INVALID_ARGUMENT          = 0x0100,
-        FLAG_INVALID_HEADER            = 0x0200,
-        FLAG_INVALID_HEADER_VALUE      = 0X0300,
-        FLAG_INVALID_CONTENT_LENGTH    = 0x0400,
-        FLAG_CONTENT_LENGTH_EXCEEDED   = 0x0800,
-        FLAG_UNTERMINATED_HEADERS      = 0x1000,
-        FLAG_MAX_HEADER_SIZE           = 0X2000,
-        FLAG_MAX_HEADER_NAME_SIZE      = 0X2100,
-        FLAG_MAX_HEADER_VALUE_SIZE     = 0X2200,
-        FLAG_DUPLICATE_SINGLE_HEADER   = 0X3000,
-        FLAG_REQUEST_QUERY_EXCEEDED    = 0X4000,
-        FLAG_REQUEST_URL_EXCEEDED      = 0X5000,
-        FLAG_SMUGGING_TE_CL            = 0x6000
+        FLAG_OK = 0x0000,
+        FLAG_BAD_REQUEST = 0x0001,
+        FLAG_METHOD_NOT_ALLOWED = 0x0002,
+        FLAG_NOT_FOUND = 0x0004,
+        FLAG_CORS_PREFLIGHT = 0x0008,
+        FLAG_HTTP_VERSION_UNSUPPORTED = 0x0010,
+        FLAG_CONTENT_LENGTH_TOO_LARGE = 0x0020,
+        FLAG_MISSING_HOST = 0x0040,
+        FLAG_HAS_BODY = 0x0080,
+        FLAG_INVALID_ARGUMENT = 0x0100,
+        FLAG_INVALID_HEADER = 0x0200,
+        FLAG_INVALID_HEADER_VALUE = 0X0300,
+        FLAG_INVALID_CONTENT_LENGTH = 0x0400,
+        FLAG_CONTENT_LENGTH_EXCEEDED = 0x0800,
+        FLAG_UNTERMINATED_HEADERS = 0x1000,
+        FLAG_MAX_HEADER_SIZE = 0X2000,
+        FLAG_MAX_HEADER_NAME_SIZE = 0X2100,
+        FLAG_MAX_HEADER_VALUE_SIZE = 0X2200,
+        FLAG_DUPLICATE_SINGLE_HEADER = 0X3000,
+        FLAG_REQUEST_QUERY_EXCEEDED = 0X4000,
+        FLAG_REQUEST_URL_EXCEEDED = 0X5000,
+        FLAG_SMUGGING_TE_CL = 0x6000
     }
 
+
     /**
-     * @interface Server
-     * @description Defines the public methods and properties of the Http server instance.
-     * It is used to configure and manage the server settings and lifecycle.
+     * @interface HttpContext
+     * @description Public API surface of the HTTP runtime context.
+     * Wraps Node.js `net.Server` and provides HTTP features such as
+     * routing, pooling, limits, CORS and lifecycle management.
      */
-    export interface Server {
+    export interface HttpContext {
 
         /**
-         * @method enableCors
-         * @description Enables and configures Cross-Origin Resource Sharing (CORS) for the server.
-         * @param {CorsConfig} opts - CORS configuration options.
-         * @returns {this} The server instance for chaining.
+         * Underlying raw Node.js server instance.
+         * Can be used for low-level socket/event access when needed.
          */
-        enableCors(opts: CorsConfig): this;
+        readonly server: net.Server;
 
-        // --- Server Configuration Getters/Setters ---
+
+        // --------------------------------------------------
+        // CORS
+        // --------------------------------------------------
 
         /**
-         * @method setTimeout
-         * @description Sets the connection timeout value.
-         * @param {number} timeout - Timeout duration in milliseconds. Must be greater than 0.
+         * Enables and configures Cross-Origin Resource Sharing (CORS).
+         *
+         * Automatically injects CORS headers into responses.
+         *
+         * @returns {this} Context instance (chainable)
+         */
+        enableCors(cfg: CorsConfig): this;
+
+
+        // --------------------------------------------------
+        // Configuration
+        // --------------------------------------------------
+
+        /**
+         * Sets the connection timeout.
+         * @default 3000 ms
          */
         setTimeout(timeout: number): void;
 
         /**
-         * @method setRequestQuerySize
-         * @description Sets the maximum allowed size for the request query string.
-         * @param {number} requestQuerySize - Maximum query string size in bytes. Must be greater than 0.
+         * Sets the maximum allowed query string size.
+         * @default 2048 bytes
          */
         setRequestQuerySize(requestQuerySize: number): void;
 
         /**
-         * @method setMaxHeaderSize
-         * @description Sets the maximum allowed size for request headers.
-         * @param {number} maxHeaderSize - Maximum header size in bytes. Must be greater than 0.
-         */
-        setMaxHeaderSize(maxHeaderSize: number): void;
-
-        /**
-         * @method setMaxContentSize
-         * @description Sets the maximum allowed size for the request body (content/payload).
-         * @param {number} maxContentSize - Maximum content size in bytes. Must be greater than 0.
+         * Sets the maximum allowed request body (payload) size.
+         * @default 3145728 bytes (3MB)
          */
         setMaxContentSize(maxContentSize: number): void;
 
         /**
-         * @method getTimeout
-         * @description Gets the current connection timeout value.
-         * @returns {number} The timeout duration in milliseconds.
+         * Sets the max header name size.
+         * @default 512 bytes
          */
+        setMaxHeaderNameSize(maxHeaderNameSize: number): void;
+
+        /**
+         * Sets the max header value size.
+         * @default 1024 bytes
+         */
+        setMaxHeaderValueSize(maxHeaderValueSize: number): void;
+
+        // --------------------------------------------------
+        // Getters
+        // --------------------------------------------------
+
         getTimeout(): number;
-
-        /**
-         * @method getRequestQuerySize
-         * @description Gets the current maximum request query string size.
-         * @returns {number} The maximum query string size in bytes.
-         */
         getRequestQuerySize(): number;
-
-        /**
-         * @method getMaxHeaderSize
-         * @description Gets the current maximum request header size.
-         * @returns {number} The maximum header size in bytes.
-         */
-        getMaxHeaderSize(): number;
-
-        /**
-         * @method getMaxContentSize
-         * @description Gets the current maximum request content size.
-         * @returns {number} The maximum content size in bytes.
-         */
+        getMaxHeaderNameSize(): number;
+        getMaxHeaderValueSize(): number;
         getMaxContentSize(): number;
 
-        // --- Server Lifecycle Methods ---
+
+        // --------------------------------------------------
+        // Lifecycle
+        // --------------------------------------------------
 
         /**
-         * @property {boolean} listening
-         * @description A boolean indicating whether or not the server is listening for connections.
+         * Starts listening for incoming connections.
+         * @returns {this} Context instance (chainable)
          */
-        listening: boolean;
+        listen(
+            port?: number,
+            hostname?: string,
+            backlog?: number,
+            listeningListener?: () => void
+        ): this;
+
+
+        // --------------------------------------------------
+        // Resource Management
+        // --------------------------------------------------
 
         /**
-         * @method listen
-         * @description Starts the server listening for connections.
-         * @param {number} [port] - The port to listen on.
-         * @param {string} [hostname] - The host name or IP address to listen on.
-         * @param {() => void} [listeningListener] - Callback function once the server starts listening.
-         * @param {number} [backlog] - The maximum length of the queue of pending connections.
-         * @returns {this} The server instance for chaining.
+         * Sets maximum number of concurrent requests.
+         * Resizes internal pools.
+         *
+         * @default 5000
          */
-        listen(port?: number, hostname?: string, listeningListener?: () => void, backlog?: number): this;
-
-        /**
-         * @method address
-         * @description Returns the bound address, address family name, and port of the server.
-         * @returns {net.AddressInfo | string | null} The address info.
-         */
-        address(): net.AddressInfo | string | null;
-
-        // --- Resource Management ---
-
-        /**
-         * @method setMaxRequests
-         * @description Sets the maximum number of concurrent requests the server can handle by resizing internal pools.
-         * @param {number} n - The maximum number of concurrent requests. Must be 1 or greater.
-         * @returns {boolean} Returns `true` if the pools were successfully resized, `false` otherwise.
-         */
-        setMaxRequests: (n: number) => boolean;
-
-        /**
-         * @method getMaxListeners
-         * @description Gets the current maximum listener value.
-         * @returns {number} The maximum number of listeners.
-         */
-        getMaxListeners(): number;
-
-        /**
-         * @method setMaxListeners
-         * @description Sets the max number of listeners.
-         * @param {number} n - The maximum number of listeners.
-         * @returns {this} The server instance for chaining.
-         */
-        setMaxListeners(n: number): this;
-
-        // --- Event Handling (net.Server methods) ---
-
-        /**
-         * @method on
-         * @description Registers an event listener for the 'close' event.
-         */
-        on(event: 'close', listener: () => void): this;
-
-        /**
-         * @method on
-         * @description Registers an event listener for the 'connection' event.
-         */
-        on(event: 'connection', listener: (socket: net.Socket) => void): this;
-
-        /**
-         * @method on
-         * @description Registers an event listener for the 'error' event.
-         */
-        on(event: 'error', listener: (err: Error) => void): this;
-
-        /**
-         * @method on
-         * @description Registers an event listener for the 'listening' event.
-         */
-        on(event: 'listening', listener: () => void): this;
-
-        /**
-         * @method on
-         * @description Registers a listener for any specified event.
-         * @param {string} event - The name of the event.
-         * @param {Function} listener - The callback function.
-         */
-        on(event: string, listener: (...args: any[]) => void): this;
-
-        /**
-         * @method off
-         * @description Removes a registered listener for the specified event.
-         * @param {string} event - The name of the event.
-         * @param {Function} listener - The callback function to remove.
-         */
-        off(event: string, listener: (...args: any[]) => void): this;
-
-        // --- Stop Server ---
-
-        /**
-         * @method close
-         * @description Stops the server from accepting new connections and keeps existing connections.
-         * @param {(err?: Error) => void} [callback] - Called when the server has closed.
-         * @returns {this} The server instance for chaining.
-         */
-        close(callback?: (err?: Error) => void): this;
+        setMaxRequests(n: number): boolean;
     }
 
     /**
@@ -370,33 +297,84 @@ export namespace Http {
     }
 
     /**
-     * @interface ServerOptions
-     * @description Options used to configure the behavior of the Http server.
-     * @property {net.ServerOpts} netServerOptions - Options passed to the underlying Node.js net.Server structure.
-     * @property {number} [maxHeaderSize=2048] - The maximum allowed request header size (bytes). (Recommended: 2048 - 4096)
-     * @property {number} [maxContentSize=3145728] - The maximum allowed request content/payload size (bytes). (Recommended: 1MB - 10MB)
-     * @property {number} [timeout=0] - Socket timeout duration (milliseconds). (3000: No timeout)
-     * @property {boolean} [untilEnd=false] - Determines if the server should wait for the end of the stream when Content-Length or Transfer-Encoding are not specified.
-     * If `false` and these headers are missing, the request is closed immediately and ignored (Default behavior).
-     * If `true`, it waits until the end of the stream.
-     * @property {number} [maxRequests=5000] - The maximum number of simultaneous requests/connections that can be processed. Also determines the pool size. (Recommended: 5000 - 10000)
-     * @property {typeof PipeResponseBase} ResponseCtor - The constructor function for the custom Response class to be used for requests.
-     * Can be used by extending `PipeResponseBase` to add your own custom response types (e.g., for JSON, XML, etc.).
-     * @property {number} [requestQuerySize=2048] - The maximum allowed request query string size (bytes). (Recommended: 1024 - 4096)
-     */
+ * Configuration options used to initialize the HTTP context/server.
+ */
     export interface ServerOptions {
-        netServerOptions?: net.ServerOpts
+
+        /**
+         * Options forwarded directly to the underlying Node.js `net.Server`.
+         */
+        netServerOptions?: net.ServerOpts;
+
+        /**
+         * Maximum total header size in bytes.
+         * @default 2048
+         * @recommended 2048 – 4096
+         */
         maxHeaderSize?: number;
+
+        /**
+         * Maximum allowed header name size in bytes.
+         * @default 256
+         */
         maxHeaderNameSize?: number;
+
+        /**
+         * Maximum allowed header value size in bytes.
+         * @default 2048
+         */
         maxHeaderValueSize?: number;
+
+        /**
+         * Maximum allowed request body (payload) size in bytes.
+         * @default 3145728 (3MB)
+         * @recommended 1MB – 10MB
+         */
         maxContentSize?: number;
+
+        /**
+         * Socket timeout duration in milliseconds.
+         * 0 disables timeout.
+         * @default 3000
+         */
         timeout?: number;
+
+        /**
+         * Determines behavior when `Content-Length` or `Transfer-Encoding` is missing.
+         *
+         * false → close immediately  
+         * true → wait until stream ends
+         *
+         * @default false
+         */
         untilEnd?: boolean;
+
+        /**
+         * Maximum number of concurrent requests/connections.
+         * Also defines internal pool size.
+         * @default 5000
+         * @recommended 5000 – 10000
+         */
         maxRequests?: number;
+
+        /**
+         * Custom response constructor.
+         * Extend `PipeResponseBase` to implement JSON/XML/custom responses.
+         */
         ResponseCtor?: typeof PipeResponseBase;
-        bootstrapPoolChunkProgression?: (createdChunkProgression: ChunkProgression) =>  void;
+
+        /**
+         * Callback triggered when a new pool chunk is created during bootstrap.
+         */
+        bootstrapPoolChunkProgression?: (createdChunkProgression: ChunkProgression) => void;
+
+        /**
+         * Maximum allowed request query string size in bytes.
+         * @default 2048
+         */
         requestQuerySize?: number;
     }
+
 
     /**
      * @interface ServerState
@@ -430,49 +408,148 @@ export namespace Http {
 
     export type AccumulateHandleFn = (socket: net.Socket, p: ChunkProgression) => void;
 
+    /**
+     * Represents a single HTTP endpoint bound to a specific route + method.
+     * Contains handler, middleware chain and per-endpoint limits.
+     */
     export interface Endpoint {
+
+        /**
+         * URL path segment of the endpoint.
+         * Example: "/users", "/:id"
+         */
         url: string;
+
+        /**
+         * HTTP method handled by this endpoint.
+         */
         method: HttpMethod;
+
+        /**
+         * Optional content configuration (type/encoding rules).
+         */
         ct?: ContentConfig;
+
+        /**
+         * Optional custom accumulate handler used during request parsing.
+         * Overrides default accumulation behavior.
+         */
         accumulateHandle?: AccumulateHandleFn;
+
+        /**
+         * Middleware chain executed before the main handler.
+         */
         middlewares: Middleware[];
+
+        /**
+         * Adds a middleware to this endpoint.
+         * @returns {Endpoint} same endpoint (chainable)
+         */
         addMiddleware(mw: Middleware): Endpoint;
+
+        /**
+         * Main request handler function.
+         */
         handle: EndpointHandleFn | any;
 
+        /**
+         * If true, waits until stream end even if
+         * `Content-Length` / `Transfer-Encoding` is missing.
+         *
+         * Overrides global server setting.
+         * @default false
+         */
         untilEnd?: boolean;
+
+        /**
+         * Maximum request body size allowed for this endpoint.
+         * Overrides global server limit.
+         */
         maxContentSize?: number;
-        maxHeaderSize?: number;
-    }
-    
-    export interface EndpointOpt {
-        untilEnd?: boolean;
-        maxContentSize?: number;
+
+        /**
+         * Maximum header size allowed for this endpoint.
+         * Overrides global server limit.
+         */
         maxHeaderSize?: number;
     }
 
     /**
-     * @interface Route
-     * @description Defines a routing structure for the Http server.
-     * It is the basic building block of the routing tree.
-     * @property {string} url - The URL path segment this route will match (e.g., '/users').
-     * @property {Endpoint[]} endpoints - Endpoints corresponding to HTTP methods for this route.
-     * @property {Middleware[]} middlewares - Middleware functions to run for requests to this route and its sub-routes.
-     * @property {Route[]} routes - Nested sub-routes under this route.
-     * @method addRoute - Adds a new sub-route.
-     * @method addEndpoint - Adds a new endpoint.
-     * @method addMiddleware - Adds a new middleware.
+     * Optional per-endpoint configuration overrides.
+     * Used when creating endpoints to customize limits locally.
+     */
+    export interface EndpointOpt {
+
+        /**
+         * Overrides global `untilEnd` behavior.
+         * @default false
+         */
+        untilEnd?: boolean;
+
+        /**
+         * Overrides global maximum content size.
+         */
+        maxContentSize?: number;
+
+        /**
+         * Overrides global maximum header size.
+         */
+        maxHeaderSize?: number;
+    }
+
+    /**
+     * Represents a routing node in the HTTP routing tree.
+     *
+     * A route can:
+     * - contain endpoints
+     * - contain middlewares
+     * - contain nested sub-routes
+     *
+     * Works similar to Express/Fastify router groups.
      */
     export interface Route {
+
+        /**
+         * Base URL path segment for this route.
+         * Example: "/users"
+         */
         url: string;
+
+        /**
+         * Endpoints registered for this route.
+         */
         endpoints: Endpoint[];
+
+        /**
+         * Middlewares applied to this route and all child routes.
+         */
         middlewares: Middleware[];
+
+        /**
+         * Nested child routes.
+         */
         routes: Route[];
+
+        /**
+         * Adds a child route.
+         * @returns {Route} same route (chainable)
+         */
         addRoute(r: Route): Route;
+
+        /**
+         * Adds an endpoint to this route.
+         * @returns {Route} same route (chainable)
+         */
         addEndpoint(ep: Endpoint): Route;
+
+        /**
+         * Adds a middleware to this route.
+         * @returns {Route} same route (chainable)
+         */
         addMiddleware(mw: Middleware): Route;
     }
 
-    export interface BuildedRoute { 
+    export interface BuildedRoute {
         method: string;
         route: string;
         vptrTableIndex: number;
@@ -523,24 +600,96 @@ export namespace Http {
         deflate = "deflate",
     }
 
+    /**
+     * Defines content negotiation and parsing rules for an endpoint.
+     *
+     * Controls how request bodies are interpreted and decoded
+     * based on Content-Type and Content-Encoding headers.
+     */
     export interface ContentConfig {
-        type: ContentTypeTables | null | undefined;
-        encoding: ContentEncodingTables | null | undefined
+
+        /**
+         * Expected content type of the request body.
+         *
+         * If undefined → any type is accepted.
+         */
+        type?: ContentTypeTables | null;
+
+        /**
+         * Expected content encoding (gzip, br, deflate, etc.).
+         *
+         * If undefined → no decoding is applied.
+         */
+        encoding?: ContentEncodingTables | null;
     }
 
+    /**
+     * Internal compiled route representation used at runtime.
+     *
+     * Created after the routing tree is built.
+     * Contains fully prepared handlers, middleware chain and limits
+     * for fast request dispatching.
+     */
     export interface RoutePipe {
-        accumulateHandler(socket: net.Socket, chunkProgression: ChunkProgression): void;
+
+        /**
+         * Function responsible for accumulating and parsing
+         * incoming socket data into a request.
+         */
+        accumulateHandler(
+            socket: net.Socket,
+            chunkProgression: ChunkProgression
+        ): void;
+
+        /**
+         * Full normalized route URL.
+         * Example: "/users/:id"
+         */
         url: string;
+
+        /**
+         * Optional content configuration for this route.
+         */
         ct?: ContentConfig;
+
+        /**
+         * Precompiled pipeline handler (middlewares + endpoint handler).
+         */
         pipeHandler: Function;
+
+        /**
+         * Ordered middleware handlers executed before the endpoint.
+         */
         mws: Http.MiddlewareHandleFn[];
+
+        /**
+         * Response constructor used to create response objects
+         * for this route.
+         */
         ResponseCtor: typeof PipeResponseBase;
+
+        /**
+         * Internal route identifier (used for fast lookup/dispatch).
+         */
         routeId: number;
 
+        /**
+         * Determines whether to wait for stream end when
+         * Content-Length / Transfer-Encoding is missing.
+         */
         untilEnd: boolean;
+
+        /**
+         * Maximum allowed request body size in bytes for this route.
+         */
         maxContentSize: number;
+
+        /**
+         * Maximum allowed header size in bytes for this route.
+         */
         maxHeaderSize: number;
     }
+
 
     export type ParseInitialFn = (
         socket: net.Socket,
@@ -548,9 +697,28 @@ export namespace Http {
         p: Http.ChunkProgression
     ) => void;
 
+    /**
+     * Configuration options for the Web HTTP context.
+    */
     export interface WebContextState {
+        /**
+         * Physical folder name where static files are served from.
+         * @default "dist"
+         * @example "./dist", "./build", "./public"
+        */
         publicStaticPath?: string;
+
+        /**
+         * URL route prefix for static assets.
+         * @default "/public"
+         * @example "/assets" -> http://host/assets/logo.png
+        */
         publicStaticRoute?: string;
+
+        /**
+         * Entry HTML file for SPA fallback (used when route not found).
+         * @default "dist/index.html"
+        */
         spaRootPath?: string;
     }
 
@@ -670,4 +838,38 @@ export namespace Http {
          */
         chunkParser: ChunkParser;
     }
+
+    /**
+     * Minimal public contract for a response object.
+     *
+     * Allows setting headers, status and sending content,
+     * then serializing into a raw HTTP buffer.
+     */
+    export interface IHttpResponseBase {
+
+        /** Sets HTTP status code. */
+        setStatus(code: number): this;
+
+        /** Sets a single header. */
+        setHeader(key: string, value: string): this;
+
+        /** Sets multiple headers at once. */
+        setHeaders(obj: Record<string, string>): this;
+
+        /** Sends plain text payload. */
+        send(payload: string): void;
+
+        /** Sends JSON payload. */
+        json(obj: unknown): void;
+
+        /** Sends redirect response. */
+        redirect(url: string, code?: number): void;
+
+        /** Produces raw HTTP buffer for socket write. */
+        getResp(): Buffer;
+
+        /** Releases object back to pool. */
+        freeCPool(): void;
+    }
+
 }

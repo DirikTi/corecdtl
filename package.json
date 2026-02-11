@@ -21,6 +21,7 @@
     "build": "node-gyp rebuild && rm -rf dist && tsc",
     "install": "node-gyp-build",
     "prebuild": "prebuildify --napi --strip",
+    "build-ts": "tsc",
     "test": "vitest run",
     "benchmark": "node benchmark/e2e/run.js",
     "prepublishOnly": "npm run build",

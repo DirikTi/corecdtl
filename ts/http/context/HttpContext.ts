@@ -6,7 +6,7 @@ import { PipeResponseBase } from "../response/PipeResponseBase";
 import ChunkProgression from "../chunker/ChunkProgression";
 import { createAccumulators } from "../factory/accumulator";
 
-abstract class HttpContext {
+abstract class HttpContext implements Http.HttpContext {
     protected MODE!: "web" | "api";
 
     protected abstract contentDecoding: Http.ContentDecoding;
@@ -34,7 +34,7 @@ abstract class HttpContext {
     protected abstract parseInitial: Http.ParseInitialFn;
 
     protected state!: Http.ServerState;
-    protected enableCors = false;
+    protected isEnableCors = false;
     
     protected httpCore!: IHttpCore;
     protected setHttpCore(mode: "web" | "api"): void {
@@ -203,7 +203,7 @@ abstract class HttpContext {
         this.routePipes = routePipes;
     }
 
-    public enabledCors(cfg: Http.CorsConfig) {
+    public enableCors(cfg: Http.CorsConfig) {
         function toHeaderValue(v?: Http.CorsValue): string | undefined {
             if (!v) return undefined;
             return Array.isArray(v) ? v.join(",") : v;
@@ -242,7 +242,9 @@ abstract class HttpContext {
                         this.state.corsHeaders + "\r\n" +
                         "Content-Length: 0\r\n\r\n"
                     );
-        this.enableCors = true;
+        this.isEnableCors = true;
+
+        return this;
     }
 
     public setTimeout(timeout: number) { 
@@ -289,6 +291,7 @@ abstract class HttpContext {
         }
         return true;
     }
+    
 
     public getTimeout() { return this.state.timeout }
     public getRequestQuerySize() { return this.state.requestQuerySize }
