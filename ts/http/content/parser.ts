@@ -69,5 +69,5 @@ export const contentParserTable: Record<string, (b: any) => any> = {
     "application/json": JSON.parse,
     "application/x-www-form-urlencoded": formParse,
     "multipart/form-data": multipartParser,
-    "text/plain": (b: Buffer) => decoder.decode
+    "text/plain": (b: Buffer) => decoder.decode(b)
 };
