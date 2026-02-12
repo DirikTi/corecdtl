@@ -29,7 +29,7 @@ export { createServer };
 // Core types (main public API)
 // ================================
 export * from "./http";
-
+export * from "./http/response/PipeResponseBase";
 
 // ================================
 // Factories / Builders
