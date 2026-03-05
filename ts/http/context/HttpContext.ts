@@ -74,8 +74,9 @@ abstract class HttpContext implements Http.HttpContext {
 
     private setRegisterChunkProgression(n: number, cPool: any, respCPool: any) {
         const objs: ChunkProgression[] = [];
+        const rawBufferSize = this.state.maxHeaderSize + this.state.requestQuerySize + this.state.maxContentSize;
         for (let i = 0; i < n; i++) {
-            const cpObj = new ChunkProgression(cPool, this.parseInitial, respCPool);
+            const cpObj = new ChunkProgression(cPool, this.parseInitial, respCPool, rawBufferSize);
             if (this.bootstrapPoolChunkProgressionFn) {
                 this.bootstrapPoolChunkProgressionFn(cpObj);
             }

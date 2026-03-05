@@ -46,7 +46,7 @@ export function startCoreCDTLServer(port = 3000) {
           type: "application/json"
         },
         undefined,
-        (socket, p) => {
+        /*(socket, p) => {
           const h = p.headers;
           const contentLenStr = h["content-length"];
           p.contentLen = parseInt(contentLenStr);
@@ -70,6 +70,7 @@ export function startCoreCDTLServer(port = 3000) {
             return;
           }
         }
+          */
       )
     );
     

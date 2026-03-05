@@ -1497,6 +1497,6 @@ FlagBits scanHeaders(
         }
         } // switch
     }
-
-    return FLAG_OK;
+    
+    return FLAG_UNTERMINATED_HEADERS;
 }

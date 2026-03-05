@@ -12,7 +12,7 @@ type RouteDefinationFn = (
     socket: net.Socket,
     p: Http.ChunkProgression, 
     routeId: number, 
-    chunk: Buffer<ArrayBufferLike>
+    chunk: Buffer
 ) => void;
 
 type CacheEntry = {

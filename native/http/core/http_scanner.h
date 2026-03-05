@@ -391,7 +391,7 @@ namespace HttpScanner {
         const char* name;                 // lowercase header name
         hv_value_parser_fn value_parser;   // value parsing strategy
     } HeaderDesc;
-
+    
     FlagBits hv_get_value_number(
         const char* __restrict buf, 
         uint32_t* __restrict __offset, 

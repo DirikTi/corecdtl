@@ -18,12 +18,13 @@ class ChunkProgression {
     mainOffset: number;
     retFlag: number;
     rawBuf: Buffer;
-    
+    writeOffset: number;
+
     private respCpool: any;
     private cPool: any;
     private parseInitial: any;
-
-    constructor(cPool: any, parseInitial: Function, respCpool: any) {
+    
+    constructor(cPool: any, parseInitial: Function, respCpool: any, rawBufferSize: number) {
         this.cPool = cPool;
         this.fn = parseInitial;
         this.chunkParser = {
@@ -39,8 +40,9 @@ class ChunkProgression {
         this.method = Http.HttpMethod.GET;
         this.headerSize = 0;
         this.mainOffset = 0;
+        this.writeOffset = 0;
         this.retFlag = Http.RetFlagBits.FLAG_OK;
-        this.rawBuf = Buffer.allocUnsafe(0);
+        this.rawBuf = Buffer.allocUnsafe(rawBufferSize);
         this.objId = cPool.registerObj(this);
         this.respCpool = respCpool;
         this.parseInitial = parseInitial;
@@ -62,7 +64,7 @@ class ChunkProgression {
         this.headerSize = 0;
         this.mainOffset = 0;
         this.retFlag = Http.RetFlagBits.FLAG_OK;
-        this.rawBuf = Buffer.allocUnsafe(0);
+        this.writeOffset = 0;
     }
 
     free() {

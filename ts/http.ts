@@ -832,6 +832,12 @@ export namespace Http {
         rawBuf: Buffer;
 
         /**
+         * @property {number} writeOffset
+         * @description The current write offset within `rawBuf` where the next incoming data chunk should be written.
+         */
+        writeOffset: number;
+
+        /**
          * @property {ChunkParser} chunkParser
          * @description An internal object responsible for parsing chunked transfer encoding body data.
          * Only used when the request uses 'Transfer-Encoding: chunked'.

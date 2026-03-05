@@ -54,7 +54,5 @@ const api = createServer({
     untilEnd: false,
 }).Api(root);
 
-console.log("inn");
-
 api.listen(3000);
 console.log(`[CoreCDTL] API server listening on :3000`);

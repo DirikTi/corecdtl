@@ -26,7 +26,8 @@
     "benchmark": "node benchmark/e2e/run.js",
     "prepublishOnly": "npm run build",
     "example": "node example/server.js",
-    "example:web": "node example/server.web.js"
+    "example:web": "node example/server.web.js",
+    "example:api": "node example/server.api.js"
   },
   "files": [
     "dist",

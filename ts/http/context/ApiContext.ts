@@ -3,8 +3,6 @@ import { contentDecodingTable, contentEncodingTable } from "../content/encoding"
 import { Http } from "../../http";
 import HttpContext from "./HttpContext";
 import net from "net";
-import { createAccumulators } from "../factory/accumulator";
-import { exit } from "process";
 
 class ApiContext extends HttpContext {
     protected contentDecoding = contentDecodingTable;
@@ -18,7 +16,10 @@ class ApiContext extends HttpContext {
     }
 
     private bindServer(netServerOptions?: net.ServerOpts) {
-        this.server = new net.Server(netServerOptions, (socket) => {
+        this.server = new net.Server({
+            ...netServerOptions,
+            highWaterMark: 64 * 1024
+        }, (socket) => {
             let p: Http.ChunkProgression = this.chunkPool.allocate();
             if (!p) {
                 socket.destroy();
@@ -26,7 +27,7 @@ class ApiContext extends HttpContext {
             }
     
             socket.setTimeout(this.state.timeout);
-            // socket.setNoDelay(true);
+            socket.setNoDelay(false);
             // socket.setKeepAlive(true, 60000);
     
             socket.on("data", chunk => {
@@ -115,7 +116,8 @@ class ApiContext extends HttpContext {
                     return;
 
                 case Http.RetFlagBits.FLAG_UNTERMINATED_HEADERS:
-                    p.rawBuf = chunk;
+                    chunk.copy(p.rawBuf, 0);
+                    p.writeOffset = chunk.length;
                     p.routePipe = this.routePipes[routeId];
                     p.fn = this.parseHeader;
                     return; 
@@ -149,7 +151,8 @@ class ApiContext extends HttpContext {
         chunk,
         p
     ) => {
-        p.rawBuf = Buffer.concat([p.rawBuf, chunk]);
+        chunk.copy(p.rawBuf, p.writeOffset);
+        p.writeOffset += chunk.length;
         this.httpCore.scannerHeader(p.rawBuf, p, this.state.maxHeaderNameSize, this.state.maxHeaderValueSize, 
             this.state.maxHeaderSize);
         if (p.retFlag !== Http.RetFlagBits.FLAG_OK) {

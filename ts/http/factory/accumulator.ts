@@ -85,7 +85,7 @@ export function createAccumulators(ctx: {
     // ==============================
     // CHUNKED MODE (Sync handler, async final processing)
     // ==============================
-    function accumulateChunked(socket: net.Socket, chunk: Buffer<ArrayBufferLike>, p: Http.ChunkProgression) {
+    function accumulateChunked(socket: net.Socket, chunk: Buffer, p: Http.ChunkProgression) {
         const total = p.chunkParser.streaming.getTotalSize();
         // @ts-ignore
         if (total + chunk.length > p.routePipe!.maxContentSize) {
@@ -193,10 +193,9 @@ export function createAccumulators(ctx: {
         // ───────────────────────────────────────────────
         if (already.length === p.contentLen) {
             // socket.pause();
-
             p.routePipe!.pipeHandler(
                 already, p, contentTypeParsers, contentDecoding, p.routePipe!.mws, (ret: any) => {
-                    socket.write(ret);
+                    const writeRet = socket.write(ret);
 
                     if (h.connection == "close") {
                         socket.destroySoon();
