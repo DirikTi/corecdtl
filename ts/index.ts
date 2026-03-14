@@ -7,13 +7,13 @@ function createServer(opts?: Http.ServerOptions) {
         Web(webCtxOpts: Http.WebContextState, mainRoute?: Http.Route) {
             const ctx = new WebContext(webCtxOpts, opts);
             ctx.setHttpCore();
-            ctx.registerRouters(mainRoute);
+            ctx.registerRouters(mainRoute, opts?.swaggerConfig);
             return ctx;
         },
-        Api(mainRoute: Http.Route) {
+        Api(mainRoute: Http.Route ) {
             const ctx = new ApiContext(opts);
             ctx.setHttpCore();
-            ctx.registerRouters(mainRoute);
+            ctx.registerRouters(mainRoute, opts?.swaggerConfig);
             return ctx;
         }
     }

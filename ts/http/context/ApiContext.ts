@@ -184,8 +184,8 @@ class ApiContext extends HttpContext {
 
     };
 
-    override registerRouters(mainRoute: Http.Route) {
-        super.registerRouters(mainRoute);
+    override registerRouters(mainRoute: Http.Route, conf?: Http.SwaggerConfig): void {
+        super.registerRouters(mainRoute, conf);
     }
 
     override setHttpCore(): void {

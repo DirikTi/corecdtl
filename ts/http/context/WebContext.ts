@@ -279,7 +279,7 @@ class WebContext extends HttpContext {
         this.routeDefinationFns[p.routePipe!.routeId](socket, p, p.routePipe!.routeId, chunk);
     };
 
-    override registerRouters(mainRoute: Http.Route | undefined) {
+    override registerRouters(mainRoute: Http.Route | undefined, conf?: Http.SwaggerConfig) {
         let _startRoutePath = "/";
         
         if (mainRoute == undefined) {
@@ -296,7 +296,7 @@ class WebContext extends HttpContext {
         mainRoute.addRoute(__routePublic);
         mainRoute.addRoute(_routeSPA);
 
-        super.registerRouters(mainRoute);
+        super.registerRouters(mainRoute, conf);
 
         this.setRouteDefinationFn(_startRoutePath);
     }

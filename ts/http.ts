@@ -297,8 +297,8 @@ export namespace Http {
     }
 
     /**
- * Configuration options used to initialize the HTTP context/server.
- */
+     * Configuration options used to initialize the HTTP context/server.
+     */
     export interface ServerOptions {
 
         /**
@@ -373,6 +373,12 @@ export namespace Http {
          * @default 2048
          */
         requestQuerySize?: number;
+
+        /**
+         * Optional Swagger/OpenAPI configuration for automatic API documentation generation.
+         * If provided, the server will generate and serve API docs based on the defined routes and handlers.
+         */
+        swaggerConfig?: SwaggerConfig;
     }
 
 
@@ -582,7 +588,7 @@ export namespace Http {
         [key: string]: BodyParserFn | null | undefined;
     };
 
-    enum ContentTypeTables {
+    export enum ContentTypeTables {
         JSON = 'application/json',
         URL_ENCODED_FORM = 'application/x-www-form-urlencoded',
         MULTIPART_FORM = 'multipart/form-data',
@@ -878,4 +884,25 @@ export namespace Http {
         freeCPool(): void;
     }
 
+    export interface SwaggerConfig {
+
+        /**
+         * URL where Swagger UI will be served.
+         * Example: "/docs"
+         */
+        url: string;
+
+        /**
+         * Endpoint where OpenAPI JSON will be exposed.
+         * Default: "/openapi.json"
+         */
+        openApiPath?: string;
+
+        /**
+         * Swagger UI bundle provided by the user.
+         * Usually imported from swagger-ui-dist or swagger-ui.
+         */
+        swaggerUi: any;
+
+    }
 }

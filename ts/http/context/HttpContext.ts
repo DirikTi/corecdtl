@@ -1,10 +1,10 @@
 import { Http } from "../../http";
 import { hypernode, type IHttpCore, type ICPool } from "../../hypernode";
-import { createPipeline } from "../factory/pipeline";
 import net from "net";
 import { PipeResponseBase } from "../response/PipeResponseBase";
 import ChunkProgression from "../chunker/ChunkProgression";
 import { createAccumulators } from "../factory/accumulator";
+import { RouteBuilder } from "../factory/route";
 
 abstract class HttpContext implements Http.HttpContext {
     protected MODE!: "web" | "api";
@@ -29,7 +29,8 @@ abstract class HttpContext implements Http.HttpContext {
     protected routePipes!: Http.RoutePipe[];
 
     // protected chunkObjs!: ChunkProgression[];
-    protected accumulators!: ReturnType<typeof createAccumulators>;
+
+    protected routeBuilder?: RouteBuilder;
 
     protected abstract parseInitial: Http.ParseInitialFn;
 
@@ -99,109 +100,20 @@ abstract class HttpContext implements Http.HttpContext {
         );
     }
 
-    protected registerRouters(mainRoute: Http.Route) {
-        this.accumulators = createAccumulators({
+    protected registerRouters(mainRoute: Http.Route, conf?: Http.SwaggerConfig) {
+        let accumulators = createAccumulators({
             contentDecoding: this.contentDecoding,
             contentTypeParsers: this.contentTypeParsers,
             errorRespMap: this.errorRespMap
         });
-        this.buildRoute(mainRoute, this.state);
-    }
 
-    private buildRoute(_Route: Http.Route, state: Http.ServerState) {
-        let buildedRoutes: Http.BuildedRoute[] = [];
-        let routePipes: Http.RoutePipe[] = [];
-        let accumulators = this.accumulators;
+        this.routeBuilder = new RouteBuilder(accumulators, mainRoute);
+        conf && this.routeBuilder?.setSwagger(conf);
+        let buildedRoutes = this.routeBuilder.buildRoute(this.state);
 
-        function getMethodStr(method: Http.HttpMethod) {
-            switch (method) {
-                case Http.HttpMethod.GET:     return "GET";
-                case Http.HttpMethod.POST:    return "POST";
-                case Http.HttpMethod.PUT:     return "PUT";
-                case Http.HttpMethod.PATCH:   return "PATCH";
-                case Http.HttpMethod.DELETE:  return "DELETE";
-                case Http.HttpMethod.OPTIONS: return "OPTIONS";
-                case Http.HttpMethod.HEAD:    return "HEAD";
-                default: return "UNKNOWN";
-            }
-        }
-
-        function normalizeRoutePattern(route: string) {
-            let normalized = route.replace(/:([^\/]*)/g, ':');
-
-            if (normalized.endsWith(':')) {
-                normalized += '/';
-            }
-
-            return normalized;
-        }
-
-        function desicionMaker(ep: Http.Endpoint)  {
-            if (ep.method === Http.HttpMethod.GET || ep.method === Http.HttpMethod.HEAD)
-                return accumulators.accumulatorHeadGet;
-
-            if (ep.accumulateHandle)
-                return ep.accumulateHandle;
-
-            if (ep.ct) {
-                if (ep.ct.encoding && ep.ct.type)
-                    return accumulators.accumulatorDefinedTypeEncode;
-                else if (ep.ct.encoding)
-                    return accumulators.accumulatorDefinedEncode;
-                else if (ep.ct.type)
-                    return accumulators.accumulatorDefinedType;
-            }
-
-            return accumulators.decisionAccumulate;
-        }
-
-        function buildSubTree(rootRoute: Http.Route, url: string, _mws: Http.Middleware[]) {
-            let mws = [..._mws];
-            
-            let mwIdx = 0;
-            while (mwIdx < rootRoute.middlewares.length) {
-                let mw = rootRoute.middlewares[mwIdx++];
-                mws.push(mw);
-            }
-
-            let epIdx = 0;
-            while (epIdx < rootRoute.endpoints.length) {
-                let ep = rootRoute.endpoints[epIdx++];
-                let pipeFns = [...mws.map((v) => v.handle), ...ep.middlewares.map((v) => v.handle), ep.handle ];
-                let accumulateHandler = desicionMaker(ep);
-                let mainIndex = routePipes.push({
-                    url: url + ep.url,
-                    ct: ep?.ct,
-                    mws: pipeFns,
-                    pipeHandler: createPipeline(ep, pipeFns),
-                    ResponseCtor: state.ResponseCtor,
-                    accumulateHandler: accumulateHandler,
-                    routeId: epIdx,
-
-                    maxContentSize: ep.maxContentSize || state.maxContentSize,
-                    maxHeaderSize: ep.maxHeaderSize || state.maxHeaderNameSize,
-                    untilEnd: ep.untilEnd || state.untilEnd,
-                }) - 1;
-                let bRoute = {
-                    method: getMethodStr(ep.method),
-                    route: normalizeRoutePattern(url + ep.url), 
-                    vptrTableIndex: mainIndex 
-                };
-                buildedRoutes.push(bRoute)
-            }
-
-            let routeIdx = 0;
-            while (routeIdx < rootRoute.routes.length) {
-                let childRoute = rootRoute.routes[routeIdx++];
-                let childUrl = url + childRoute.url;
-                buildSubTree(childRoute, childUrl, mws);
-            }
-        }
-
-        buildSubTree(_Route, _Route.url, []);
         if (this.httpCore.registerRoutes(buildedRoutes) != buildedRoutes.length) throw new Error("Building Route Tree");
 
-        this.routePipes = routePipes;
+        this.routePipes = this.routeBuilder.getRoutePipes();
     }
 
     public enableCors(cfg: Http.CorsConfig) {
@@ -248,6 +160,10 @@ abstract class HttpContext implements Http.HttpContext {
         return this;
     }
 
+    public swagger(conf: Http.SwaggerConfig) {
+        
+    }
+
     public setTimeout(timeout: number) { 
         timeout > 0 ? this.state.timeout = timeout : null 
     }
@@ -292,7 +208,6 @@ abstract class HttpContext implements Http.HttpContext {
         }
         return true;
     }
-    
 
     public getTimeout() { return this.state.timeout }
     public getRequestQuerySize() { return this.state.requestQuerySize }

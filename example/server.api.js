@@ -47,11 +47,32 @@ const ep = CoreCDTLFactory.createEndpoint(
     },
     undefined
 );
+
+const authBase = CoreCDTLFactory.createRoute("/auth");
+
+const epAuth = CoreCDTLFactory.createEndpoint(
+    Http.HttpMethod.POST,
+    "/login",
+    (req, res) => {
+        res.json({ ok: true }, 0);
+    },
+    {
+        encoding: null,
+        type: "application/json"
+    },
+    undefined
+);
+
 base.addEndpoint(ep);
+authBase.addEndpoint(epAuth);
+
 root.addRoute(base);
+root.addRoute(authBase);
+
 const api = createServer({
     timeout: 10_000,
     untilEnd: false,
+    
 }).Api(root);
 
 api.listen(3000);
